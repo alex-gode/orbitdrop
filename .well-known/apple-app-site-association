@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["UD6RGA5T32.com.orbitdrop.OrbitDrop"],
+        "components": [
+          {
+            "/": "/challenge/*",
+            "comment": "Orbit Drop challenge links: /challenge/v1/<payload>.<checksum>"
+          }
+        ]
+      }
+    ]
+  }
+}

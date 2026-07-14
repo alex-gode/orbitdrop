@@ -1,0 +1,9 @@
+This empty file disables Jekyll on GitHub Pages, and it is load-bearing.
+
+Jekyll silently drops paths beginning with a dot, so without this file
+.well-known/apple-app-site-association is never published and every
+universal link falls back to Safari. The failure is invisible: the build
+succeeds, the site works, and only the AASA is missing.
+
+Do not delete it. Jekyll is not otherwise used here; every file in this
+directory is served verbatim.
