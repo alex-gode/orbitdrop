@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit Drop: one orb, one opening</title>
+<meta name="description" content="A one-thumb arcade game for iPhone. Tap when the orb meets the gate. No account, no tracking, nothing to fill in.">
+
+<!-- Open Graph: STATIC and generic by design. The score itself travels in
+     the share's generated card image, so the link preview only needs to
+     say what Orbit Drop is. Dynamic per-score previews would require a
+     deployed dynamic/serverless service (see README.md; do not add one
+     without approval). -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Orbit Drop: one orb, one opening">
+<meta property="og:description" content="Same rings, same speeds, same order. Think you can go deeper?">
+<meta property="og:url" content="https://orbit-drop.com/">
+<meta property="og:image" content="https://orbit-drop.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+  /* Self-contained: no external fonts, scripts, images, or trackers. The
+     palette is the game's own Ion theme. */
+  :root {
+    --bg-top: #0d0f21;
+    --bg-bottom: #03030d;
+    --ring: #4dd9ff;
+    --gate: #ff66cc;
+    --success: #59ffa6;
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.55);
+    --card: rgba(255, 255, 255, 0.05);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    text-align: center;
+    padding: 32px 20px;
+  }
+  main { max-width: 420px; width: 100%; }
+  .orbit { width: 150px; height: 150px; margin: 0 auto 26px; display: block; }
+  h1 {
+    font-size: 30px;
+    letter-spacing: 0.28em;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .tag {
+    color: var(--ring);
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 26px 22px;
+    margin-bottom: 26px;
+  }
+  .card h2 { font-size: 19px; font-weight: 700; margin-bottom: 10px; }
+  .card p { color: var(--text-dim); font-size: 15px; line-height: 1.55; }
+  .buttons { display: grid; gap: 12px; }
+  .btn {
+    display: block;
+    padding: 15px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .btn-primary { background: var(--success); color: #04140b; }
+  .btn-secondary {
+    color: var(--text-dim);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    display: none; /* shown only when JS can build the app link */
+  }
+  /* The pre-launch state of the primary button: it is not a link, because
+     there is nothing to link to yet. See the STORE LINK note below. */
+  .btn-pending {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+  }
+  footer { margin-top: 30px; color: var(--text-dim); font-size: 12px; line-height: 1.6; }
+  footer a { color: var(--text-dim); }
+</style>
+</head>
+<body>
+<main>
+  <!-- Project-owned orbit mark: the game's ring, gate, and orb, drawn
+       inline so the page needs no asset files at all. -->
+  <svg class="orbit" viewBox="0 0 120 120" role="img" aria-label="Orbit Drop: an orb circling a ring toward a gate">
+    <circle cx="60" cy="60" r="46" fill="none" stroke="#4dd9ff" stroke-width="2.5" opacity="0.9"/>
+    <circle cx="60" cy="60" r="34" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5"/>
+    <circle cx="60" cy="60" r="22" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5"/>
+    <path d="M 92.3 74.5 A 46 46 0 0 1 74.5 92.3" fill="none" stroke="#ff66cc" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="60" cy="14" r="5.5" fill="#ffffff"/>
+    <circle cx="60" cy="14" r="9" fill="none" stroke="#4dd9ff" stroke-opacity="0.5" stroke-width="2"/>
+  </svg>
+
+  <h1>ORBIT DROP</h1>
+  <!-- The static text is the GENERIC state, because this same file is
+       served both at the bare domain and (as 404.html) at every
+       /challenge/... path. Greeting a bare visitor with "you have been
+       challenged" would be a lie, so the challenge framing is applied by
+       the script below only when the address actually carries one. -->
+  <p class="tag" id="tagline">ONE ORB. ONE OPENING.</p>
+
+  <div class="card">
+    <h2 id="headline">Tap when the orb meets the gate.</h2>
+    <p id="blurb">
+      Every ring is deeper, faster, and less forgiving than the last. One
+      thumb, one rule, no tutorial to sit through. No account, no
+      tracking, nothing to fill in.
+    </p>
+  </div>
+
+  <div class="buttons">
+    <!-- STORE LINK: Orbit Drop is not on the App Store yet, so there is no
+         numeric app id to link to and this deliberately is NOT a link. The
+         deploy script (Tools/deploy-web.sh) rewrites this element into a
+         real apps.apple.com link when APP_STORE_ID is supplied, and refuses
+         to leave a dead href behind either way. Offering a GET button that
+         goes nowhere is the kind of small lie this project does not tell. -->
+    <span class="btn btn-pending" id="get-app">COMING SOON TO THE APP STORE</span>
+    <!-- Progressive enhancement only: with the app installed, iOS normally
+         opens it straight from the universal link and this page is never
+         seen. If the page IS shown, this button re-offers the app via the
+         custom scheme. Hidden without JavaScript; everything above works
+         with none. No automatic redirect happens anywhere. -->
+    <a class="btn btn-secondary" id="open-app" href="#">OPEN IN THE APP</a>
+  </div>
+
+  <footer>
+    <p id="foot">
+      A one-thumb arcade game for iPhone.
+      <a href="/privacy.html">Privacy</a>
+    </p>
+  </footer>
+</main>
+
+<script>
+  // Optional enhancement: if this address carries a challenge, say so, and
+  // rebuild the app link from the page's own URL.
+  // /challenge/v1/<segment> -> orbitdrop://challenge/v1/<segment>
+  (function () {
+    // Tolerates a trailing slash: iOS, the AASA glob, and the app's own
+    // router all accept one, so this layer must too.
+    var match = location.pathname.match(/^\/challenge\/(v\d+)\/([A-Za-z0-9_\-]+\.[0-9a-f]{8})\/?$/);
+    if (!match) return;
+
+    document.getElementById("tagline").textContent = "YOU HAVE BEEN CHALLENGED";
+    document.getElementById("headline").textContent = "One orb. One opening.";
+    document.getElementById("blurb").textContent =
+      "A friend beat their own nerve and wants to see yours. Tap when the " +
+      "orb crosses the gate; every ring is deeper, faster, and less " +
+      "forgiving. Their link carries the exact same rings, speeds, and " +
+      "gate order they faced. Only the timing is yours.";
+    document.getElementById("foot").innerHTML =
+      "The challenge stays in this page's address: opening it on an iPhone " +
+      "with Orbit Drop installed launches the exact run. " +
+      '<a href="/privacy.html">Privacy</a>';
+
+    var button = document.getElementById("open-app");
+    button.href = "orbitdrop://challenge/" + match[1] + "/" + match[2];
+    button.style.display = "block";
+  })();
+</script>
+</body>
+</html>
